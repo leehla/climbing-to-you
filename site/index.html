@@ -52,6 +52,38 @@
             holds and earn the view.
           </p>
 
+          <div class="character-picker" role="radiogroup" aria-label="Choose your climber">
+            <span class="character-picker-label">Choose your climber</span>
+            <div class="character-options">
+              <button
+                class="character-option is-selected"
+                data-character="man"
+                type="button"
+                role="radio"
+                aria-checked="true"
+              >
+                <span class="character-thumb">
+                  <img src="./assets/climber-man.png" alt="" />
+                </span>
+                <span>Man</span>
+                <i aria-hidden="true">✓</i>
+              </button>
+              <button
+                class="character-option"
+                data-character="woman"
+                type="button"
+                role="radio"
+                aria-checked="false"
+              >
+                <span class="character-thumb">
+                  <img src="./assets/climber-woman.png" alt="" />
+                </span>
+                <span>Woman</span>
+                <i aria-hidden="true">✓</i>
+              </button>
+            </div>
+          </div>
+
           <button class="primary-button" id="start-climb" type="button">
             <span>Start climbing</span>
             <span class="button-icon" aria-hidden="true">↑</span>
@@ -92,8 +124,9 @@
 
           <img
             class="hero-climber"
-            src="./assets/climber-character.png"
-            alt="An illustrated climber reaching for the next hold"
+            id="hero-climber"
+            src="./assets/climber-man.png"
+            alt="An illustrated male climber reaching for the next hold"
           />
 
           <div class="wall-note">
@@ -163,7 +196,7 @@
             <img
               class="game-climber"
               id="game-climber"
-              src="./assets/climber-character.png"
+              src="./assets/climber-man.png"
               alt=""
               style="--climber-x: 14%; --climber-y: 91%"
             />

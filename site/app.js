@@ -24,6 +24,7 @@
     recordingSeconds: 0,
     recordingTimer: null,
     maxRecordingSeconds: Math.min(Number(config.maxRecordingSeconds) || 180, 300),
+    character: "man",
     client: null,
     user: null,
     latestNote: null,
@@ -37,6 +38,8 @@
     viewLinks: [...document.querySelectorAll("[data-view-link]")],
     navLinks: [...document.querySelectorAll(".nav-link")],
     startClimb: document.querySelector("#start-climb"),
+    characterButtons: [...document.querySelectorAll("[data-character]")],
+    heroClimber: document.querySelector("#hero-climber"),
     holds: [...document.querySelectorAll(".route-hold")],
     climber: document.querySelector("#game-climber"),
     progressLabel: document.querySelector("#progress-label"),
@@ -108,6 +111,32 @@
     window.setTimeout(() => {
       els.holds[0]?.focus({ preventScroll: true });
     }, 450);
+  }
+
+  function setCharacter(character, remember = true) {
+    if (!["man", "woman"].includes(character)) return;
+    state.character = character;
+    const source = `./assets/climber-${character}.png`;
+    els.heroClimber.src = source;
+    els.heroClimber.alt =
+      character === "man"
+        ? "An illustrated male climber reaching for the next hold"
+        : "An illustrated female climber reaching for the next hold";
+    els.climber.src = source;
+
+    els.characterButtons.forEach((button) => {
+      const selected = button.dataset.character === character;
+      button.classList.toggle("is-selected", selected);
+      button.setAttribute("aria-checked", String(selected));
+    });
+
+    if (remember) {
+      try {
+        window.localStorage.setItem("climbing-character", character);
+      } catch {
+        // The selector still works when browser storage is unavailable.
+      }
+    }
   }
 
   function resetClimb() {
@@ -743,6 +772,9 @@
       });
     });
     els.startClimb.addEventListener("click", startClimb);
+    els.characterButtons.forEach((button) => {
+      button.addEventListener("click", () => setCharacter(button.dataset.character));
+    });
     els.holds.forEach((hold) => {
       hold.addEventListener("click", () => climbToHold(hold));
     });
@@ -791,6 +823,13 @@
   }
 
   bindEvents();
+  let savedCharacter = "man";
+  try {
+    savedCharacter = window.localStorage.getItem("climbing-character") || "man";
+  } catch {
+    savedCharacter = "man";
+  }
+  setCharacter(savedCharacter, false);
   resetClimb();
   resetRecorderControls();
   initSupabase().catch((error) => {

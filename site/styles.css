@@ -329,10 +329,102 @@ audio:focus-visible {
 
 .hero-description {
   max-width: 560px;
-  margin: 30px 0 34px;
+  margin: 30px 0 24px;
   color: var(--muted);
   font-size: clamp(1.05rem, 1.45vw, 1.3rem);
   line-height: 1.6;
+}
+
+.character-picker {
+  display: grid;
+  margin-bottom: 28px;
+  gap: 9px;
+}
+
+.character-picker-label {
+  color: var(--pine);
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.character-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+}
+
+.character-option {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  min-width: 126px;
+  min-height: 54px;
+  padding: 6px 14px 6px 7px;
+  gap: 9px;
+  border: 2px solid rgba(41, 74, 59, 0.12);
+  border-radius: 999px;
+  color: var(--muted);
+  background: var(--white);
+  font-size: 0.8rem;
+  font-weight: 900;
+  transition:
+    border-color 180ms ease,
+    color 180ms ease,
+    background 180ms ease,
+    transform 180ms ease;
+}
+
+.character-option:hover {
+  border-color: rgba(41, 74, 59, 0.3);
+  color: var(--pine);
+  transform: translateY(-1px);
+}
+
+.character-option.is-selected {
+  border-color: var(--pine);
+  color: var(--pine);
+  background: rgba(124, 154, 120, 0.12);
+  box-shadow: 0 7px 16px rgba(41, 74, 59, 0.08);
+}
+
+.character-thumb {
+  position: relative;
+  display: block;
+  width: 39px;
+  height: 39px;
+  overflow: hidden;
+  border-radius: 50%;
+  background: var(--cream-deep);
+}
+
+.character-thumb img {
+  position: absolute;
+  top: 3px;
+  left: 50%;
+  width: 48px;
+  height: 72px;
+  object-fit: contain;
+  transform: translateX(-50%);
+}
+
+.character-option i {
+  display: grid;
+  width: 18px;
+  height: 18px;
+  margin-left: auto;
+  border-radius: 50%;
+  color: transparent;
+  background: rgba(41, 74, 59, 0.08);
+  font-size: 0.62rem;
+  font-style: normal;
+  place-items: center;
+}
+
+.character-option.is-selected i {
+  color: white;
+  background: var(--pine);
 }
 
 .primary-button,
@@ -1934,6 +2026,19 @@ audio:focus-visible {
   .hero-description {
     margin: 24px 0 28px;
     font-size: 1rem;
+  }
+
+  .character-picker {
+    width: 100%;
+  }
+
+  .character-options {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .character-option {
+    min-width: 0;
   }
 
   .primary-button {
