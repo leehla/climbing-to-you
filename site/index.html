@@ -1,0 +1,317 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Climb a playful virtual wall to unlock a private voice note at the summit."
+    />
+    <meta name="theme-color" content="#fff7ea" />
+    <title>Climbing to You</title>
+    <link rel="icon" href="./assets/favicon.svg" type="image/svg+xml" />
+    <link rel="manifest" href="./manifest.webmanifest" />
+    <link rel="stylesheet" href="./styles.css" />
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="./config.js"></script>
+    <script src="./app.js" defer></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content">Skip to content</a>
+
+    <header class="site-header" aria-label="Main navigation">
+      <button class="brand button-reset" data-view-link="welcome" aria-label="Go home">
+        <span class="brand-mark" aria-hidden="true">
+          <span></span>
+          <span></span>
+        </span>
+        <span>Climbing to You</span>
+      </button>
+
+      <nav class="main-nav" aria-label="Main">
+        <button class="nav-link is-active" data-view-link="welcome">Climb</button>
+        <button class="nav-link" data-view-link="record">Leave a voice</button>
+      </nav>
+
+      <button class="account-button" id="account-button" type="button">
+        <span class="status-dot" aria-hidden="true"></span>
+        <span id="account-label">Demo mode</span>
+      </button>
+    </header>
+
+    <main id="main-content">
+      <section class="view welcome-view is-active" id="welcome-view" aria-labelledby="hero-title">
+        <div class="hero-copy">
+          <p class="eyebrow">
+            <span aria-hidden="true">↗</span>
+            A little love, one hold at a time
+          </p>
+          <h1 id="hero-title">Climb all the way to <em>hear me.</em></h1>
+          <p class="hero-description">
+            A voice note is waiting at the summit. No shortcuts—follow the glowing
+            holds and earn the view.
+          </p>
+
+          <button class="primary-button" id="start-climb" type="button">
+            <span>Start climbing</span>
+            <span class="button-icon" aria-hidden="true">↑</span>
+          </button>
+
+          <article class="route-card" aria-label="Current route">
+            <div class="route-thumbnail" aria-hidden="true">
+              <span class="sun"></span>
+              <span class="mountain mountain-back"></span>
+              <span class="mountain mountain-front"></span>
+            </div>
+            <div>
+              <p class="route-label">Today’s route</p>
+              <h2>Summit Secret</h2>
+              <p><span class="tiny-lock" aria-hidden="true">●</span> 1 voice note at the top</p>
+            </div>
+            <span class="difficulty-pill">Cute</span>
+          </article>
+        </div>
+
+        <div class="hero-wall" aria-label="Illustration of a playful climbing wall">
+          <div class="wall-grain" aria-hidden="true"></div>
+          <span class="decor-hold hold-peach hold-a" aria-hidden="true"></span>
+          <span class="decor-hold hold-purple hold-b" aria-hidden="true"></span>
+          <span class="decor-hold hold-yellow hold-c" aria-hidden="true"></span>
+          <span class="decor-hold hold-peach hold-d" aria-hidden="true"></span>
+          <span class="decor-hold hold-purple hold-e" aria-hidden="true"></span>
+          <span class="decor-hold hold-yellow hold-f" aria-hidden="true"></span>
+          <span class="decor-hold hold-peach hold-g" aria-hidden="true"></span>
+          <span class="decor-hold hold-purple hold-h" aria-hidden="true"></span>
+
+          <div class="summit-preview">
+            <span class="summit-rays" aria-hidden="true"></span>
+            <span class="wave-icon" aria-hidden="true">
+              <i></i><i></i><i></i><i></i><i></i>
+            </span>
+          </div>
+
+          <img
+            class="hero-climber"
+            src="./assets/climber-character.png"
+            alt="An illustrated climber reaching for the next hold"
+          />
+
+          <div class="wall-note">
+            <span aria-hidden="true">✦</span>
+            <div>
+              <strong>Something sweet is up there</strong>
+              <small>Keep climbing to unlock it</small>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="view climb-view" id="climb-view" aria-labelledby="climb-title" hidden>
+        <div class="climb-toolbar">
+          <button class="back-button" data-view-link="welcome" type="button">
+            <span aria-hidden="true">←</span> Back
+          </button>
+          <div>
+            <p class="route-label">Route in progress</p>
+            <h1 id="climb-title">Summit Secret</h1>
+          </div>
+          <div class="progress-block" aria-live="polite">
+            <span id="progress-label">0 of 7 holds</span>
+            <div class="progress-track" aria-hidden="true">
+              <span id="progress-bar"></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="game-layout">
+          <div
+            class="climb-stage"
+            id="climb-stage"
+            aria-label="Interactive climbing wall. Select the glowing hold to move upward."
+          >
+            <div class="wall-grain" aria-hidden="true"></div>
+            <svg class="route-line" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+              <path
+                d="M14 91 C20 84, 22 81, 27 77 S42 72, 44 66 S32 60, 36 54 S54 49, 57 43 S66 36, 68 31 S62 20, 64 16 S76 10, 80 7"
+              />
+            </svg>
+
+            <span class="decor-hold hold-purple game-decor-1" aria-hidden="true"></span>
+            <span class="decor-hold hold-peach game-decor-2" aria-hidden="true"></span>
+            <span class="decor-hold hold-yellow game-decor-3" aria-hidden="true"></span>
+            <span class="decor-hold hold-purple game-decor-4" aria-hidden="true"></span>
+            <span class="decor-hold hold-peach game-decor-5" aria-hidden="true"></span>
+            <span class="decor-hold hold-yellow game-decor-6" aria-hidden="true"></span>
+            <span class="decor-hold hold-purple game-decor-7" aria-hidden="true"></span>
+            <span class="decor-hold hold-peach game-decor-8" aria-hidden="true"></span>
+
+            <button class="route-hold hold-peach" data-step="1" style="--x: 27%; --y: 77%" aria-label="Hold 1"></button>
+            <button class="route-hold hold-purple" data-step="2" style="--x: 44%; --y: 66%" aria-label="Hold 2"></button>
+            <button class="route-hold hold-yellow" data-step="3" style="--x: 36%; --y: 54%" aria-label="Hold 3"></button>
+            <button class="route-hold hold-peach" data-step="4" style="--x: 57%; --y: 43%" aria-label="Hold 4"></button>
+            <button class="route-hold hold-purple" data-step="5" style="--x: 68%; --y: 31%" aria-label="Hold 5"></button>
+            <button class="route-hold hold-peach" data-step="6" style="--x: 64%; --y: 16%" aria-label="Hold 6"></button>
+            <button
+              class="route-hold summit-hold hold-yellow"
+              data-step="7"
+              style="--x: 80%; --y: 7%"
+              aria-label="Summit hold with a locked voice note"
+            >
+              <span class="summit-lock" aria-hidden="true">♥</span>
+            </button>
+
+            <img
+              class="game-climber"
+              id="game-climber"
+              src="./assets/climber-character.png"
+              alt=""
+              style="--climber-x: 14%; --climber-y: 91%"
+            />
+
+            <div class="start-flag" aria-hidden="true">START</div>
+            <div class="summit-flag" aria-hidden="true">
+              <span>SUMMIT</span>
+              <small>Your voice note</small>
+            </div>
+          </div>
+
+          <aside class="climb-guide">
+            <span class="guide-number" id="guide-number">01</span>
+            <p class="eyebrow">Your next move</p>
+            <h2 id="guide-title">Find the glowing hold</h2>
+            <p id="guide-copy">
+              Tap the hold that pulses. Your climber will follow the route one move
+              at a time.
+            </p>
+            <div class="guide-tip">
+              <span aria-hidden="true">☝</span>
+              <p><strong>Tip</strong> The voice stays locked until you reach the very top.</p>
+            </div>
+            <button class="secondary-button" id="reset-climb" type="button">Restart route</button>
+          </aside>
+        </div>
+      </section>
+
+      <section class="view record-view" id="record-view" aria-labelledby="record-title" hidden>
+        <div class="record-intro">
+          <p class="eyebrow"><span aria-hidden="true">♥</span> A surprise for the summit</p>
+          <h1 id="record-title">Hide your voice <em>at the top.</em></h1>
+          <p>
+            Record something sweet, silly, or encouraging. Your person will only
+            hear it after finishing the climb.
+          </p>
+          <ul class="record-prompts" aria-label="Recording ideas">
+            <li>“You made it!”</li>
+            <li>“Here’s what I miss about you…”</li>
+            <li>“Your reward is one terrible joke.”</li>
+          </ul>
+        </div>
+
+        <div class="recorder-card">
+          <div class="recorder-topline">
+            <span class="recording-status" id="recording-status">
+              <i aria-hidden="true"></i> Ready to record
+            </span>
+            <span id="recording-timer">00:00</span>
+          </div>
+
+          <div class="waveform" id="waveform" aria-hidden="true">
+            <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+            <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+          </div>
+
+          <button class="record-button" id="record-button" type="button" aria-label="Start recording">
+            <span class="mic-icon" aria-hidden="true"></span>
+          </button>
+          <p class="record-hint" id="record-hint">Tap to start · Up to 3 minutes</p>
+
+          <audio class="audio-preview" id="audio-preview" controls hidden></audio>
+
+          <div class="recorder-actions">
+            <button class="text-button" id="discard-recording" type="button" disabled>
+              Discard
+            </button>
+            <button class="primary-button compact" id="send-recording" type="button" disabled>
+              <span>Hide at the summit</span>
+              <span class="button-icon" aria-hidden="true">↑</span>
+            </button>
+          </div>
+
+          <p class="privacy-note">
+            <span aria-hidden="true">●</span>
+            Voice notes are private and only available to your paired person.
+          </p>
+        </div>
+      </section>
+    </main>
+
+    <div class="summit-overlay" id="summit-overlay" hidden>
+      <section class="summit-card" role="dialog" aria-modal="true" aria-labelledby="summit-title">
+        <button class="close-button" id="close-summit" type="button" aria-label="Close summit message">×</button>
+        <div class="summit-badge" aria-hidden="true">♥</div>
+        <p class="eyebrow">Summit reached!</p>
+        <h2 id="summit-title">You climbed all the way to me.</h2>
+        <p id="summit-message">
+          Your voice note is unlocked. Press play when you’re ready.
+        </p>
+        <div class="summit-player" id="summit-player">
+          <button class="play-button" id="play-summit" type="button" aria-label="Play summit voice note">
+            <span aria-hidden="true">▶</span>
+          </button>
+          <div>
+            <strong id="summit-audio-title">A note from your person</strong>
+            <span id="summit-audio-meta">Waiting at the top</span>
+          </div>
+          <div class="mini-wave" aria-hidden="true">
+            <i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+          </div>
+        </div>
+        <audio id="summit-audio"></audio>
+        <button class="secondary-button full-width" id="climb-again" type="button">Climb again</button>
+      </section>
+    </div>
+
+    <div class="auth-overlay" id="auth-overlay" hidden>
+      <section class="auth-card" role="dialog" aria-modal="true" aria-labelledby="auth-title">
+        <button class="close-button" id="close-auth" type="button" aria-label="Close sign in">×</button>
+        <p class="eyebrow">Your private wall</p>
+        <h2 id="auth-title">Sign in to your pair</h2>
+        <p>Use one of the two accounts connected to this climbing wall.</p>
+        <form id="auth-form">
+          <label>
+            Email
+            <input id="auth-email" type="email" autocomplete="email" required placeholder="you@example.com" />
+          </label>
+          <label>
+            Password
+            <input
+              id="auth-password"
+              type="password"
+              autocomplete="current-password"
+              minlength="8"
+              required
+              placeholder="At least 8 characters"
+            />
+          </label>
+          <p class="form-message" id="auth-message" aria-live="polite"></p>
+          <button class="primary-button full-width" type="submit">
+            <span>Sign in</span><span class="button-icon" aria-hidden="true">→</span>
+          </button>
+          <button class="text-button full-width" id="create-account" type="button">
+            Create this account instead
+          </button>
+        </form>
+        <div class="demo-callout" id="demo-callout">
+          <strong>Previewing the design?</strong>
+          <span>Demo mode works without an account. Connect Supabase when you’re ready for private sharing.</span>
+        </div>
+      </section>
+    </div>
+
+    <div class="toast-region" id="toast-region" aria-live="polite" aria-atomic="true"></div>
+
+    <noscript>
+      <div class="noscript-message">Climbing to You needs JavaScript to run the climbing game.</div>
+    </noscript>
+  </body>
+</html>

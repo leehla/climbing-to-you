@@ -1,0 +1,17 @@
+{
+  "name": "Climbing to You",
+  "short_name": "Climbing",
+  "description": "Climb a playful virtual wall to unlock a private summit voice note.",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#fff7ea",
+  "theme_color": "#294a3b",
+  "icons": [
+    {
+      "src": "./assets/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
