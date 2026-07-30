@@ -1,2 +1,2 @@
-NEXT_PUBLIC_SUPABASE_URL=https://gyksyleaychbmttytuug.supabase.co
-NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=sb_publishable_Ir6i-8cuk9ed-IoYqLtH2g_nES72xc3
+NEXT_PUBLIC_SUPABASE_URL="https://gyksyleaychbmttytuug.supabase.co"
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY="sb_publishable_Ir6i-8cuk9ed-IoYqLtH2g_nES72xc3"
