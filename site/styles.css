@@ -358,6 +358,12 @@ audio:focus-visible {
   line-height: 0.88;
 }
 
+.hero-copy h1 {
+  max-width: 760px;
+  font-size: clamp(3.4rem, 5.2vw, 6.35rem);
+  line-height: 0.92;
+}
+
 .hero-copy h1 em,
 .record-intro h1 em {
   position: relative;
@@ -382,10 +388,98 @@ audio:focus-visible {
 
 .hero-description {
   max-width: 560px;
-  margin: 30px 0 24px;
+  margin: 26px 0 18px;
   color: var(--muted);
   font-size: clamp(1.05rem, 1.45vw, 1.3rem);
   line-height: 1.6;
+}
+
+.hero-whisper {
+  display: block;
+  margin-top: 7px;
+  color: var(--pine);
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 0.92em;
+  font-style: italic;
+  line-height: 1.5;
+}
+
+.love-route {
+  display: grid;
+  grid-template-columns: auto minmax(80px, 1fr) auto;
+  align-items: center;
+  width: min(100%, 560px);
+  margin: 0 0 22px;
+  padding: 12px 15px;
+  gap: 12px;
+  border: 1px solid rgba(124, 154, 120, 0.2);
+  border-radius: 20px;
+  background:
+    linear-gradient(120deg, rgba(124, 154, 120, 0.08), rgba(246, 217, 107, 0.1)),
+    var(--white);
+}
+
+.route-place {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--pine);
+}
+
+.route-place-end {
+  text-align: right;
+}
+
+.route-place > span:not(.route-flag) {
+  display: grid;
+  gap: 1px;
+}
+
+.route-place strong {
+  font-size: 0.78rem;
+  font-weight: 950;
+}
+
+.route-place small {
+  color: var(--sage);
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+}
+
+.route-flag {
+  font-size: 1.45rem;
+  filter: drop-shadow(0 2px 3px rgba(41, 74, 59, 0.12));
+}
+
+.route-journey {
+  position: relative;
+  height: 28px;
+}
+
+.route-dashes {
+  position: absolute;
+  top: 13px;
+  right: 0;
+  left: 0;
+  border-top: 2px dashed rgba(41, 74, 59, 0.38);
+  transform: rotate(-3deg);
+}
+
+.route-heart {
+  position: absolute;
+  top: 1px;
+  left: 54%;
+  display: grid;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  color: var(--pine);
+  background: var(--butter);
+  box-shadow: 0 4px 12px rgba(246, 217, 107, 0.45);
+  font-size: 0.7rem;
+  transform: translateX(-50%) rotate(4deg);
+  place-items: center;
 }
 
 .character-picker {
@@ -549,13 +643,21 @@ audio:focus-visible {
   align-items: center;
   width: min(100%, 530px);
   min-height: 126px;
-  margin-top: 38px;
+  margin-top: 30px;
   padding: 16px 18px;
   gap: 18px;
   border: 1px solid rgba(242, 162, 126, 0.32);
   border-radius: var(--radius-md);
   background: linear-gradient(135deg, rgba(242, 162, 126, 0.12), rgba(246, 217, 107, 0.1));
   box-shadow: var(--shadow-sm);
+}
+
+.love-footnote {
+  margin: 17px 0 0;
+  color: var(--sage);
+  font-size: 0.72rem;
+  font-weight: 850;
+  letter-spacing: 0.025em;
 }
 
 .route-thumbnail {
@@ -2033,7 +2135,7 @@ audio:focus-visible {
   }
 
   .hero-copy h1 {
-    font-size: clamp(3.8rem, 6.7vw, 5.7rem);
+    font-size: clamp(3.45rem, 6.2vw, 5.2rem);
   }
 
   .hero-climber {
@@ -2192,12 +2294,41 @@ audio:focus-visible {
 
   .hero-copy h1,
   .record-intro h1 {
-    font-size: clamp(3.35rem, 16vw, 5rem);
+    font-size: clamp(3rem, 14vw, 4.65rem);
   }
 
   .hero-description {
-    margin: 24px 0 28px;
+    margin: 22px 0 18px;
     font-size: 1rem;
+  }
+
+  .love-route {
+    grid-template-columns: auto minmax(45px, 1fr) auto;
+    padding: 10px 11px;
+    gap: 7px;
+  }
+
+  .route-place {
+    gap: 5px;
+  }
+
+  .route-place small {
+    display: none;
+  }
+
+  .route-flag {
+    font-size: 1.2rem;
+  }
+
+  .route-heart {
+    width: 23px;
+    height: 23px;
+    font-size: 0.62rem;
+  }
+
+  .love-footnote {
+    max-width: 280px;
+    line-height: 1.5;
   }
 
   .character-picker {
