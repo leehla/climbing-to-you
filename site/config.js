@@ -6,7 +6,7 @@
  * is enabled. NEVER place a service_role key in this file.
  */
 window.CLIMBING_CONFIG = {
-  supabaseUrl: ""https://xxxxx.supabase.co",
+  supabaseUrl: "https://xxxxx.supabase.co",
   supabaseAnonKey: "sb_publishable_xxxxxxxxx",
   maxRecordingSeconds: 180,
 };
