@@ -11,10 +11,10 @@
     <title>Climbing to You</title>
     <link rel="icon" href="./assets/favicon.svg" type="image/svg+xml" />
     <link rel="manifest" href="./manifest.webmanifest" />
-    <link rel="stylesheet" href="./styles.css" />
+    <link rel="stylesheet" href="./styles.css?v=guest-links-1" />
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="./config.js"></script>
-    <script src="./app.js" defer></script>
+    <script src="./config.js?v=guest-links-1"></script>
+    <script src="./app.js?v=guest-links-1" defer></script>
   </head>
   <body>
     <a class="skip-link" href="#main-content">Skip to content</a>
@@ -40,6 +40,14 @@
     </header>
 
     <main id="main-content">
+      <section class="invite-banner" id="invite-banner" role="status" hidden>
+        <span class="invite-banner-icon" aria-hidden="true">♥</span>
+        <div>
+          <strong id="invite-banner-title">Private guest invitation</strong>
+          <span id="invite-banner-copy">This link is available for 24 hours.</span>
+        </div>
+      </section>
+
       <section class="view welcome-view is-active" id="welcome-view" aria-labelledby="hero-title">
         <div class="hero-copy">
           <p class="eyebrow">
@@ -227,9 +235,9 @@
 
       <section class="view record-view" id="record-view" aria-labelledby="record-title" hidden>
         <div class="record-intro">
-          <p class="eyebrow"><span aria-hidden="true">♥</span> A surprise for the summit</p>
+          <p class="eyebrow" id="record-eyebrow"><span aria-hidden="true">♥</span> A surprise for the summit</p>
           <h1 id="record-title">Hide your voice <em>at the top.</em></h1>
-          <p>
+          <p id="record-description">
             Record something sweet, silly, or encouraging. Your person will only
             hear it after finishing the climb.
           </p>
@@ -260,6 +268,14 @@
 
           <audio class="audio-preview" id="audio-preview" controls hidden></audio>
 
+          <label class="guest-link-option" id="guest-link-option" hidden>
+            <input id="guest-link-mode" type="checkbox" />
+            <span>
+              <strong>Send a 24-hour guest link</strong>
+              <small>No account or password needed for your guest</small>
+            </span>
+          </label>
+
           <div class="recorder-actions">
             <button class="text-button" id="discard-recording" type="button" disabled>
               Discard
@@ -270,9 +286,9 @@
             </button>
           </div>
 
-          <p class="privacy-note">
+          <p class="privacy-note" id="privacy-note">
             <span aria-hidden="true">●</span>
-            Voice notes are private and only available to your paired person.
+            <span id="privacy-copy">Voice notes are private and only available to your paired person.</span>
           </p>
         </div>
       </section>
@@ -338,6 +354,31 @@
           <strong>Previewing the design?</strong>
           <span>Demo mode works without an account. Connect Supabase when you’re ready for private sharing.</span>
         </div>
+      </section>
+    </div>
+
+    <div class="invite-overlay" id="invite-overlay" hidden>
+      <section class="invite-card" role="dialog" aria-modal="true" aria-labelledby="invite-title">
+        <button class="close-button" id="close-invite" type="button" aria-label="Close guest link">×</button>
+        <div class="invite-badge" aria-hidden="true">24h</div>
+        <p class="eyebrow">Private guest link</p>
+        <h2 id="invite-title">Your surprise link is ready.</h2>
+        <p>
+          Send this link to one person. They can climb, hear your note, and leave
+          one voice reply without creating an account.
+        </p>
+        <label class="invite-url-label" for="invite-url">Share this link</label>
+        <div class="invite-url-row">
+          <input id="invite-url" type="text" readonly />
+          <button class="secondary-button" id="copy-invite" type="button">Copy</button>
+        </div>
+        <button class="primary-button full-width" id="share-invite" type="button">
+          <span>Share guest link</span>
+          <span class="button-icon" aria-hidden="true">↗</span>
+        </button>
+        <p class="invite-expiry" id="invite-expiry">
+          The link expires 24 hours after it is created.
+        </p>
       </section>
     </div>
 

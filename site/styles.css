@@ -229,6 +229,59 @@ audio:focus-visible {
   box-shadow: 0 0 0 4px rgba(104, 164, 110, 0.2);
 }
 
+.invite-banner {
+  display: flex;
+  align-items: center;
+  width: min(100% - 48px, 960px);
+  min-height: 68px;
+  margin: 0 auto 18px;
+  padding: 14px 20px;
+  gap: 14px;
+  border: 1px solid rgba(123, 97, 168, 0.18);
+  border-radius: 22px;
+  color: var(--pine);
+  background: rgba(246, 217, 107, 0.2);
+  box-shadow: var(--shadow-sm);
+}
+
+.invite-banner[hidden] {
+  display: none;
+}
+
+.invite-banner.is-error {
+  border-color: rgba(198, 83, 77, 0.22);
+  background: rgba(198, 83, 77, 0.09);
+}
+
+.invite-banner-icon {
+  display: grid;
+  flex: 0 0 auto;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  color: white;
+  background: var(--purple);
+  place-items: center;
+}
+
+.invite-banner.is-error .invite-banner-icon {
+  background: var(--danger);
+}
+
+.invite-banner > div {
+  display: grid;
+  gap: 2px;
+}
+
+.invite-banner strong {
+  font-size: 0.86rem;
+}
+
+.invite-banner span:not(.invite-banner-icon) {
+  color: var(--muted);
+  font-size: 0.74rem;
+}
+
 .view {
   width: min(100% - 48px, 1600px);
   margin: 0 auto;
@@ -1478,6 +1531,44 @@ audio:focus-visible {
   margin-top: 24px;
 }
 
+.guest-link-option {
+  display: flex;
+  align-items: center;
+  margin-top: 22px;
+  padding: 14px 16px;
+  gap: 12px;
+  border: 1px solid rgba(123, 97, 168, 0.18);
+  border-radius: 18px;
+  color: var(--pine);
+  background: rgba(123, 97, 168, 0.07);
+}
+
+.guest-link-option[hidden] {
+  display: none;
+}
+
+.guest-link-option input {
+  width: 20px;
+  height: 20px;
+  margin: 0;
+  accent-color: var(--purple);
+}
+
+.guest-link-option > span {
+  display: grid;
+  gap: 2px;
+}
+
+.guest-link-option strong {
+  font-size: 0.8rem;
+}
+
+.guest-link-option small {
+  color: var(--muted);
+  font-size: 0.68rem;
+  line-height: 1.35;
+}
+
 .recorder-actions {
   display: flex;
   align-items: center;
@@ -1510,14 +1601,15 @@ audio:focus-visible {
   text-align: center;
 }
 
-.privacy-note span {
+.privacy-note > span:first-child {
   color: var(--sage);
   font-size: 0.6rem;
 }
 
 /* Dialogs */
 .summit-overlay,
-.auth-overlay {
+.auth-overlay,
+.invite-overlay {
   position: fixed;
   z-index: 100;
   inset: 0;
@@ -1531,7 +1623,8 @@ audio:focus-visible {
 }
 
 .summit-overlay[hidden],
-.auth-overlay[hidden] {
+.auth-overlay[hidden],
+.invite-overlay[hidden] {
   display: none;
 }
 
@@ -1542,7 +1635,8 @@ audio:focus-visible {
 }
 
 .summit-card,
-.auth-card {
+.auth-card,
+.invite-card {
   position: relative;
   width: min(100%, 560px);
   padding: clamp(34px, 6vw, 64px);
@@ -1593,12 +1687,14 @@ audio:focus-visible {
 }
 
 .summit-card .eyebrow,
-.auth-card .eyebrow {
+.auth-card .eyebrow,
+.invite-card .eyebrow {
   justify-content: center;
 }
 
 .summit-card h2,
-.auth-card h2 {
+.auth-card h2,
+.invite-card h2 {
   margin: 0;
   color: var(--pine);
   font-size: clamp(2.2rem, 5vw, 3.5rem);
@@ -1607,7 +1703,8 @@ audio:focus-visible {
 }
 
 .summit-card > p:not(.eyebrow),
-.auth-card > p:not(.eyebrow) {
+.auth-card > p:not(.eyebrow),
+.invite-card > p:not(.eyebrow) {
   margin: 20px auto 28px;
   color: var(--muted);
   line-height: 1.55;
@@ -1786,6 +1883,81 @@ audio:focus-visible {
 
 .demo-callout strong {
   color: var(--pine);
+}
+
+.invite-card {
+  width: min(100%, 620px);
+  text-align: left;
+}
+
+.invite-card .eyebrow {
+  justify-content: flex-start;
+  margin-bottom: 12px;
+}
+
+.invite-card h2 {
+  font-size: clamp(2.15rem, 5vw, 3.35rem);
+}
+
+.invite-card > p:not(.eyebrow) {
+  margin: 16px 0 24px;
+}
+
+.invite-badge {
+  display: grid;
+  width: 68px;
+  height: 68px;
+  margin-bottom: 20px;
+  border: 9px solid rgba(246, 217, 107, 0.24);
+  border-radius: 50%;
+  color: white;
+  background: var(--purple);
+  font-size: 1rem;
+  font-weight: 950;
+  box-shadow: 0 10px 24px rgba(123, 97, 168, 0.24);
+  place-items: center;
+}
+
+.invite-url-label {
+  display: block;
+  margin-bottom: 7px;
+  color: var(--pine);
+  font-size: 0.75rem;
+  font-weight: 900;
+}
+
+.invite-url-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  margin-bottom: 18px;
+  gap: 10px;
+}
+
+.invite-url-row input {
+  min-width: 0;
+  min-height: 54px;
+  padding: 0 16px;
+  border: 2px solid rgba(41, 74, 59, 0.13);
+  border-radius: 16px;
+  color: var(--ink);
+  background: var(--white);
+}
+
+.invite-url-row .secondary-button {
+  min-height: 54px;
+  padding: 0 22px;
+}
+
+.invite-card .primary-button {
+  min-height: 60px;
+}
+
+.invite-card .invite-expiry {
+  margin: 17px 0 0;
+  color: var(--muted);
+  font-size: 0.7rem;
+  font-weight: 800;
+  text-align: center;
 }
 
 .toast-region {
@@ -2182,9 +2354,18 @@ audio:focus-visible {
   }
 
   .summit-card,
-  .auth-card {
+  .auth-card,
+  .invite-card {
     padding: 44px 22px 28px;
     border-radius: 30px;
+  }
+
+  .invite-url-row {
+    grid-template-columns: 1fr;
+  }
+
+  .invite-url-row .secondary-button {
+    width: 100%;
   }
 
   .summit-player {

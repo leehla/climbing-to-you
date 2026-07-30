@@ -27,6 +27,10 @@
     character: "man",
     client: null,
     user: null,
+    partnerId: null,
+    guestInvite: null,
+    inviteError: null,
+    createdInviteUrl: "",
     latestNote: null,
     summitAudioUrl: null,
     realtimeChannel: null,
@@ -58,6 +62,9 @@
     summitAudio: document.querySelector("#summit-audio"),
     playSummit: document.querySelector("#play-summit"),
     recordButton: document.querySelector("#record-button"),
+    recordEyebrow: document.querySelector("#record-eyebrow"),
+    recordTitle: document.querySelector("#record-title"),
+    recordDescription: document.querySelector("#record-description"),
     recordingStatus: document.querySelector("#recording-status"),
     recordingTimer: document.querySelector("#recording-timer"),
     waveform: document.querySelector("#waveform"),
@@ -65,6 +72,9 @@
     audioPreview: document.querySelector("#audio-preview"),
     discardRecording: document.querySelector("#discard-recording"),
     sendRecording: document.querySelector("#send-recording"),
+    guestLinkOption: document.querySelector("#guest-link-option"),
+    guestLinkMode: document.querySelector("#guest-link-mode"),
+    privacyCopy: document.querySelector("#privacy-copy"),
     accountButton: document.querySelector("#account-button"),
     accountLabel: document.querySelector("#account-label"),
     authOverlay: document.querySelector("#auth-overlay"),
@@ -75,6 +85,15 @@
     authMessage: document.querySelector("#auth-message"),
     createAccount: document.querySelector("#create-account"),
     demoCallout: document.querySelector("#demo-callout"),
+    inviteBanner: document.querySelector("#invite-banner"),
+    inviteBannerTitle: document.querySelector("#invite-banner-title"),
+    inviteBannerCopy: document.querySelector("#invite-banner-copy"),
+    inviteOverlay: document.querySelector("#invite-overlay"),
+    closeInvite: document.querySelector("#close-invite"),
+    inviteUrl: document.querySelector("#invite-url"),
+    copyInvite: document.querySelector("#copy-invite"),
+    shareInvite: document.querySelector("#share-invite"),
+    inviteExpiry: document.querySelector("#invite-expiry"),
     toastRegion: document.querySelector("#toast-region"),
   };
 
@@ -101,10 +120,15 @@
       else link.removeAttribute("aria-current");
     });
 
+    if (name === "record") updateRecorderMode();
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
   function startClimb() {
+    if (state.inviteError) {
+      showToast(state.inviteError, true);
+      return;
+    }
     resetClimb();
     showView("climb");
     loadSummitNote();
@@ -137,6 +161,110 @@
         // The selector still works when browser storage is unavailable.
       }
     }
+  }
+
+  function isAnonymousUser(user = state.user) {
+    return Boolean(
+      user?.is_anonymous ||
+        user?.app_metadata?.provider === "anonymous" ||
+        user?.app_metadata?.providers?.includes?.("anonymous"),
+    );
+  }
+
+  function updateRecorderMode() {
+    const buttonText = els.sendRecording.querySelector("span");
+    if (state.guestInvite) {
+      els.recordEyebrow.innerHTML =
+        '<span aria-hidden="true">↩</span> A voice back across the distance';
+      els.recordTitle.innerHTML = "Send your voice <em>back down.</em>";
+      els.recordDescription.textContent =
+        "Record a reply for the person who sent this private climb. It stays inside the same 24-hour invitation.";
+      els.guestLinkOption.hidden = true;
+      els.privacyCopy.textContent =
+        "Your reply is available only through this invitation until it expires.";
+      buttonText.textContent = "Send voice reply";
+      return;
+    }
+
+    els.recordEyebrow.innerHTML =
+      '<span aria-hidden="true">♥</span> A surprise for the summit';
+    els.recordTitle.innerHTML = "Hide your voice <em>at the top.</em>";
+    els.recordDescription.textContent =
+      "Record something sweet, silly, or encouraging. Your person will only hear it after finishing the climb.";
+
+    if (state.user && !isAnonymousUser()) {
+      els.guestLinkOption.hidden = false;
+      if (!state.partnerId) {
+        els.guestLinkMode.checked = true;
+        els.guestLinkMode.disabled = true;
+      } else {
+        els.guestLinkMode.disabled = false;
+      }
+    } else {
+      els.guestLinkOption.hidden = true;
+    }
+
+    const guestDelivery =
+      Boolean(state.user) &&
+      !isAnonymousUser() &&
+      (els.guestLinkMode.checked || !state.partnerId);
+    buttonText.textContent = guestDelivery
+      ? "Create private link"
+      : "Hide at the summit";
+    els.privacyCopy.textContent = guestDelivery
+      ? "The guest link works for one person and expires after 24 hours."
+      : "Voice notes are private and only available to your paired person.";
+  }
+
+  function updateInviteBanner() {
+    if (state.inviteError) {
+      els.inviteBanner.hidden = false;
+      els.inviteBanner.classList.add("is-error");
+      els.inviteBannerTitle.textContent = "This guest link is unavailable";
+      els.inviteBannerCopy.textContent = state.inviteError;
+      return;
+    }
+
+    if (!state.guestInvite) {
+      els.inviteBanner.hidden = true;
+      els.inviteBanner.classList.remove("is-error");
+      return;
+    }
+
+    const millisecondsLeft =
+      new Date(state.guestInvite.expires_at).getTime() - Date.now();
+    const hoursLeft = Math.max(1, Math.ceil(millisecondsLeft / 3600000));
+    els.inviteBanner.hidden = false;
+    els.inviteBanner.classList.remove("is-error");
+    els.inviteBannerTitle.textContent = "Private guest invitation";
+    els.inviteBannerCopy.textContent = `${hoursLeft} hour${hoursLeft === 1 ? "" : "s"} left · Climb to hear the note, then leave a voice reply.`;
+  }
+
+  function createInviteToken() {
+    const bytes = new Uint8Array(32);
+    window.crypto.getRandomValues(bytes);
+    return [...bytes]
+      .map((value) => value.toString(16).padStart(2, "0"))
+      .join("");
+  }
+
+  async function hashInviteToken(token) {
+    const bytes = new TextEncoder().encode(token);
+    const digest = await window.crypto.subtle.digest("SHA-256", bytes);
+    return [...new Uint8Array(digest)]
+      .map((value) => value.toString(16).padStart(2, "0"))
+      .join("");
+  }
+
+  function inviteTokenFromUrl() {
+    const token = new URL(window.location.href).searchParams.get("invite") || "";
+    return /^[0-9a-f]{64}$/i.test(token) ? token.toLowerCase() : "";
+  }
+
+  function clearInviteTokenFromUrl() {
+    const url = new URL(window.location.href);
+    url.searchParams.delete("invite");
+    window.history.replaceState({}, "", `${url.pathname}${url.search}${url.hash}`);
   }
 
   function resetClimb() {
@@ -471,6 +599,94 @@
     return "webm";
   }
 
+  async function uploadGuestVoiceNote(invite) {
+    const extension = extensionForMime(state.recordedBlob.type);
+    const fileName = `${crypto.randomUUID()}.${extension}`;
+    const filePath = `guest/${invite.id}/${state.user.id}/${fileName}`;
+
+    const { error: uploadError } = await state.client.storage
+      .from("voice-notes")
+      .upload(filePath, state.recordedBlob, {
+        cacheControl: "3600",
+        contentType: state.recordedBlob.type || "audio/webm",
+        upsert: false,
+      });
+    if (uploadError) throw uploadError;
+
+    const { error: insertError } = await state.client
+      .from("guest_voice_notes")
+      .insert({
+        invite_id: invite.id,
+        sender_id: state.user.id,
+        file_path: filePath,
+        duration_seconds: Math.max(1, state.recordingSeconds),
+      });
+
+    if (insertError) {
+      await state.client.storage.from("voice-notes").remove([filePath]);
+      throw insertError;
+    }
+  }
+
+  function buildInviteUrl(token) {
+    const url = new URL(window.location.href);
+    url.search = "";
+    url.hash = "";
+    url.searchParams.set("invite", token);
+    return url.toString();
+  }
+
+  function showInviteLink(url, expiresAt) {
+    state.createdInviteUrl = url;
+    els.inviteUrl.value = url;
+    const expiry = new Date(expiresAt);
+    els.inviteExpiry.textContent = Number.isNaN(expiry.getTime())
+      ? "The link expires 24 hours after it is created."
+      : `Expires ${expiry.toLocaleString([], {
+          dateStyle: "medium",
+          timeStyle: "short",
+        })}. It can be claimed by one person.`;
+    openDialog(els.inviteOverlay, els.copyInvite);
+  }
+
+  async function createGuestInviteAndSend() {
+    const token = createInviteToken();
+    const inviteHash = await hashInviteToken(token);
+    const { data, error } = await state.client.rpc("create_guest_invite", {
+      invite_hash: inviteHash,
+    });
+    if (error) throw error;
+
+    const result = Array.isArray(data) ? data[0] : data;
+    if (!result?.invite_id) {
+      throw new Error("The private guest link could not be created.");
+    }
+
+    const invite = {
+      id: result.invite_id,
+      creator_id: state.user.id,
+      guest_id: null,
+      expires_at: result.invite_expires_at,
+    };
+    await uploadGuestVoiceNote(invite);
+    const inviteUrl = buildInviteUrl(token);
+
+    showToast("Your 24-hour guest link is ready.");
+    discardRecording(false);
+    showView("welcome");
+    showInviteLink(inviteUrl, invite.expires_at);
+  }
+
+  async function sendGuestReply() {
+    if (new Date(state.guestInvite.expires_at).getTime() <= Date.now()) {
+      throw new Error("This private link has expired.");
+    }
+    await uploadGuestVoiceNote(state.guestInvite);
+    showToast("Your voice reply was sent.");
+    discardRecording(false);
+    showView("welcome");
+  }
+
   async function sendRecording() {
     if (!state.recordedBlob) return;
 
@@ -490,22 +706,19 @@
         return;
       }
 
-      const { data: profile, error: profileError } = await state.client
-        .from("profiles")
-        .select("partner_id")
-        .eq("id", state.user.id)
-        .single();
+      if (state.guestInvite) {
+        await sendGuestReply();
+        return;
+      }
 
-      if (profileError) throw profileError;
-      if (!profile?.partner_id) {
-        throw new Error(
-          "Your two accounts are not paired yet. Complete the pairing step in the setup guide.",
-        );
+      if (els.guestLinkMode.checked || !state.partnerId) {
+        await createGuestInviteAndSend();
+        return;
       }
 
       const extension = extensionForMime(state.recordedBlob.type);
       const fileName = `${crypto.randomUUID()}.${extension}`;
-      const filePath = `${state.user.id}/${profile.partner_id}/${fileName}`;
+      const filePath = `${state.user.id}/${state.partnerId}/${fileName}`;
 
       const { error: uploadError } = await state.client.storage
         .from("voice-notes")
@@ -518,7 +731,7 @@
 
       const { error: insertError } = await state.client.from("voice_notes").insert({
         sender_id: state.user.id,
-        recipient_id: profile.partner_id,
+        recipient_id: state.partnerId,
         file_path: filePath,
         duration_seconds: Math.max(1, state.recordingSeconds),
       });
@@ -534,7 +747,7 @@
     } catch (error) {
       showToast(error?.message || "The voice note could not be sent.", true);
     } finally {
-      originalText.textContent = "Hide at the summit";
+      updateRecorderMode();
       els.sendRecording.disabled = !state.recordedBlob;
     }
   }
@@ -623,10 +836,87 @@
 
   async function signOut() {
     if (!state.client) return;
-    const confirmed = window.confirm("Sign out of this private climbing wall?");
+    const confirmed = window.confirm(
+      state.guestInvite
+        ? "Leave this guest invitation? You may not be able to reopen it on this device."
+        : "Sign out of this private climbing wall?",
+    );
     if (!confirmed) return;
+    state.guestInvite = null;
+    state.partnerId = null;
     await state.client.auth.signOut();
+    updateInviteBanner();
+    updateRecorderMode();
     showToast("Signed out.");
+  }
+
+  async function restoreGuestInvite(user) {
+    if (!user || !isAnonymousUser(user)) return null;
+    const { data, error } = await state.client
+      .from("guest_invites")
+      .select("id, creator_id, guest_id, expires_at")
+      .eq("guest_id", user.id)
+      .gt("expires_at", new Date().toISOString())
+      .order("expires_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (error) throw error;
+    state.guestInvite = data;
+    return data;
+  }
+
+  async function activateGuestInvite(token, session) {
+    const inviteHash = await hashInviteToken(token);
+    const { data: available, error: availabilityError } = await state.client.rpc(
+      "guest_invite_available",
+      { invite_hash: inviteHash },
+    );
+    if (availabilityError) throw availabilityError;
+    if (!available) {
+      throw new Error(
+        "This private link has expired, is invalid, or was already claimed.",
+      );
+    }
+
+    let activeSession = session;
+    if (!activeSession) {
+      const { data, error } = await state.client.auth.signInAnonymously({
+        options: {
+          data: { display_name: "Guest climber" },
+        },
+      });
+      if (error) {
+        const anonymousDisabled = /anonymous|provider|disabled/i.test(
+          error.message || "",
+        );
+        throw new Error(
+          anonymousDisabled
+            ? "Guest access is not enabled yet. Ask the sender to finish the one-time setup."
+            : error.message,
+        );
+      }
+      activeSession = data.session;
+    }
+
+    const { data, error } = await state.client.rpc("redeem_guest_invite", {
+      invite_hash: inviteHash,
+    });
+    if (error) throw error;
+    const result = Array.isArray(data) ? data[0] : data;
+    if (!result?.invite_id) {
+      throw new Error("This private link could not be opened.");
+    }
+
+    state.guestInvite = {
+      id: result.invite_id,
+      creator_id: result.invite_creator_id,
+      guest_id: result.invite_guest_id,
+      expires_at: result.invite_expires_at,
+    };
+    state.inviteError = null;
+    clearInviteTokenFromUrl();
+    await applySession(activeSession);
+    showToast("Private invitation opened. Your summit is ready.");
   }
 
   async function initSupabase() {
@@ -650,7 +940,36 @@
     const {
       data: { session },
     } = await state.client.auth.getSession();
-    await applySession(session);
+
+    const url = new URL(window.location.href);
+    const rawInviteToken = url.searchParams.get("invite");
+    const inviteToken = inviteTokenFromUrl();
+
+    if (rawInviteToken) {
+      if (!inviteToken) {
+        state.inviteError = "This private link is not valid.";
+        updateInviteBanner();
+        await applySession(session);
+      } else {
+        try {
+          await activateGuestInvite(inviteToken, session);
+        } catch (error) {
+          state.inviteError =
+            error?.message || "This private link could not be opened.";
+          updateInviteBanner();
+          await applySession(session);
+        }
+      }
+    } else {
+      if (session?.user && isAnonymousUser(session.user)) {
+        try {
+          await restoreGuestInvite(session.user);
+        } catch (error) {
+          console.error("Could not restore guest invitation:", error);
+        }
+      }
+      await applySession(session);
+    }
 
     state.client.auth.onAuthStateChange((_event, nextSession) => {
       window.setTimeout(() => applySession(nextSession), 0);
@@ -659,7 +978,35 @@
 
   async function applySession(session) {
     state.user = session?.user || null;
+    state.partnerId = null;
+
+    if (
+      state.user &&
+      !state.guestInvite &&
+      !state.inviteError &&
+      isAnonymousUser(state.user)
+    ) {
+      try {
+        await restoreGuestInvite(state.user);
+      } catch (error) {
+        console.error("Could not restore guest invitation:", error);
+      }
+    }
+
+    if (state.user && !state.guestInvite && !isAnonymousUser(state.user)) {
+      const { data: profile, error } = await state.client
+        .from("profiles")
+        .select("partner_id")
+        .eq("id", state.user.id)
+        .maybeSingle();
+      if (error) console.error("Could not load profile:", error);
+      state.partnerId = profile?.partner_id || null;
+      els.guestLinkMode.checked = !state.partnerId;
+    }
+
     updateAccountUi();
+    updateInviteBanner();
+    updateRecorderMode();
 
     if (state.realtimeChannel && state.client) {
       await state.client.removeChannel(state.realtimeChannel);
@@ -671,31 +1018,64 @@
         state.summitAudioUrl = null;
       }
       state.latestNote = null;
+      state.partnerId = null;
       return;
     }
 
     await loadSummitNote();
-    state.realtimeChannel = state.client
-      .channel(`summit-notes-${state.user.id}`)
-      .on(
+    let channel = state.client.channel(`summit-notes-${state.user.id}`);
+    if (state.guestInvite) {
+      channel = channel.on(
         "postgres_changes",
         {
           event: "INSERT",
           schema: "public",
-          table: "voice_notes",
-          filter: `recipient_id=eq.${state.user.id}`,
+          table: "guest_voice_notes",
+          filter: `invite_id=eq.${state.guestInvite.id}`,
         },
-        () => {
+        (payload) => {
+          if (payload.new?.sender_id === state.user.id) return;
           loadSummitNote();
           showToast("A new voice note is waiting at your summit.");
         },
-      )
-      .subscribe();
+      );
+    } else {
+      channel = channel
+        .on(
+          "postgres_changes",
+          {
+            event: "INSERT",
+            schema: "public",
+            table: "voice_notes",
+            filter: `recipient_id=eq.${state.user.id}`,
+          },
+          () => {
+            loadSummitNote();
+            showToast("A new voice note is waiting at your summit.");
+          },
+        )
+        .on(
+          "postgres_changes",
+          {
+            event: "INSERT",
+            schema: "public",
+            table: "guest_voice_notes",
+          },
+          (payload) => {
+            if (payload.new?.sender_id === state.user.id) return;
+            loadSummitNote();
+            showToast("Your guest left a voice reply.");
+          },
+        );
+    }
+    state.realtimeChannel = channel.subscribe();
   }
 
   function updateAccountUi() {
     if (state.user) {
-      const shortEmail = state.user.email?.split("@")[0] || "Signed in";
+      const shortEmail = state.guestInvite
+        ? "24h guest"
+        : state.user.email?.split("@")[0] || "Signed in";
       els.accountLabel.textContent = shortEmail;
       els.accountButton.classList.add("is-signed-in");
       els.accountButton.setAttribute("aria-label", `Signed in as ${shortEmail}. Sign out`);
@@ -712,14 +1092,54 @@
   async function loadSummitNote() {
     if (!state.client || !state.user) return state.latestNote;
     try {
-      const { data: note, error } = await state.client
-        .from("voice_notes")
-        .select("id, sender_id, file_path, duration_seconds, created_at, listened_at")
-        .eq("recipient_id", state.user.id)
+      let note = null;
+
+      if (!state.guestInvite) {
+        const { data, error } = await state.client
+          .from("voice_notes")
+          .select(
+            "id, sender_id, file_path, duration_seconds, created_at, listened_at",
+          )
+          .eq("recipient_id", state.user.id)
+          .order("created_at", { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        if (error) throw error;
+        note = data ? { ...data, source: "pair" } : null;
+      }
+
+      let guestQuery = state.client
+        .from("guest_voice_notes")
+        .select(
+          "id, invite_id, sender_id, file_path, duration_seconds, created_at, listened_at",
+        )
+        .neq("sender_id", state.user.id)
         .order("created_at", { ascending: false })
-        .limit(1)
-        .maybeSingle();
-      if (error) throw error;
+        .limit(1);
+      if (state.guestInvite) {
+        guestQuery = guestQuery.eq("invite_id", state.guestInvite.id);
+      }
+      const { data: guestData, error: guestError } =
+        await guestQuery.maybeSingle();
+      if (guestError) throw guestError;
+      const guestNote = guestData
+        ? {
+            ...guestData,
+            source: "guest",
+            sender_label: state.guestInvite
+              ? "the person who sent your invitation"
+              : "your guest",
+          }
+        : null;
+
+      if (
+        guestNote &&
+        (!note ||
+          new Date(guestNote.created_at).getTime() >
+            new Date(note.created_at).getTime())
+      ) {
+        note = guestNote;
+      }
 
       if (!note) {
         state.latestNote = null;
@@ -743,12 +1163,49 @@
 
   async function markNoteListened(noteId) {
     if (!state.client || !state.user || noteId === "demo-note") return;
-    const { error } = await state.client
-      .from("voice_notes")
+    const isGuestNote = state.latestNote?.source === "guest";
+    let query = state.client
+      .from(isGuestNote ? "guest_voice_notes" : "voice_notes")
       .update({ listened_at: new Date().toISOString() })
-      .eq("id", noteId)
-      .eq("recipient_id", state.user.id);
+      .eq("id", noteId);
+    query = isGuestNote
+      ? query.neq("sender_id", state.user.id)
+      : query.eq("recipient_id", state.user.id);
+    const { error } = await query;
     if (error) console.error("Could not mark note as listened:", error);
+  }
+
+  async function copyInviteLink() {
+    if (!state.createdInviteUrl) return;
+    try {
+      await navigator.clipboard.writeText(state.createdInviteUrl);
+    } catch {
+      els.inviteUrl.focus();
+      els.inviteUrl.select();
+      document.execCommand("copy");
+    }
+    els.copyInvite.textContent = "Copied!";
+    showToast("Guest link copied.");
+    window.setTimeout(() => {
+      els.copyInvite.textContent = "Copy";
+    }, 1800);
+  }
+
+  async function shareInviteLink() {
+    if (!state.createdInviteUrl) return;
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: "Climbing to You",
+          text: "I left a private voice note at the summit. This link works for 24 hours.",
+          url: state.createdInviteUrl,
+        });
+        return;
+      } catch (error) {
+        if (error?.name === "AbortError") return;
+      }
+    }
+    await copyInviteLink();
   }
 
   function showToast(message, isError = false) {
@@ -793,6 +1250,7 @@
     els.recordButton.addEventListener("click", toggleRecording);
     els.discardRecording.addEventListener("click", () => discardRecording(true));
     els.sendRecording.addEventListener("click", sendRecording);
+    els.guestLinkMode.addEventListener("change", updateRecorderMode);
     els.accountButton.addEventListener("click", () => {
       if (state.user) signOut();
       else openAuth();
@@ -800,8 +1258,13 @@
     els.closeAuth.addEventListener("click", () => closeDialog(els.authOverlay));
     els.authForm.addEventListener("submit", handleAuthSubmit);
     els.createAccount.addEventListener("click", createAccount);
+    els.closeInvite.addEventListener("click", () =>
+      closeDialog(els.inviteOverlay),
+    );
+    els.copyInvite.addEventListener("click", copyInviteLink);
+    els.shareInvite.addEventListener("click", shareInviteLink);
 
-    [els.summitOverlay, els.authOverlay].forEach((overlay) => {
+    [els.summitOverlay, els.authOverlay, els.inviteOverlay].forEach((overlay) => {
       overlay.addEventListener("click", (event) => {
         if (event.target === overlay) closeDialog(overlay);
       });
@@ -810,6 +1273,7 @@
     document.addEventListener("keydown", (event) => {
       if (event.key !== "Escape") return;
       if (!els.authOverlay.hidden) closeDialog(els.authOverlay);
+      else if (!els.inviteOverlay.hidden) closeDialog(els.inviteOverlay);
       else if (!els.summitOverlay.hidden) closeDialog(els.summitOverlay);
     });
 
@@ -832,6 +1296,8 @@
   setCharacter(savedCharacter, false);
   resetClimb();
   resetRecorderControls();
+  updateRecorderMode();
+  updateInviteBanner();
   initSupabase().catch((error) => {
     console.error("Supabase initialization failed:", error);
     showToast("Private sharing could not be initialized.", true);
